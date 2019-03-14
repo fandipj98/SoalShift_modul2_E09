@@ -12,7 +12,6 @@
 
 pid_t child_id;
 int status;
-char ch;
 time_t t; 
 struct tm *tmp;
 struct stat sb;
