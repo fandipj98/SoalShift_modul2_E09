@@ -65,7 +65,7 @@ int main() {
 
     child_id = fork();
     
-    sleep(2);
+    sleep(60);
     if (child_id == 0 && counter!=0) {
       // this is child
       sprintf(s,"log%d.log",counter);
