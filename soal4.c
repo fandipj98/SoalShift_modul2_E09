@@ -14,7 +14,6 @@ pid_t child_id;
 int status,tanggal,jam,menit,detik,tanggal1,jam1,menit1,detik1,selisih,flag=0;
 time_t t; 
 struct tm *tmp;
-struct stat sb;
 char s[100],date[100],now[100],path[100],pathtemp[100],source[100]="/home/fandipj/Documents/makanan"; 
 
 int counter;
