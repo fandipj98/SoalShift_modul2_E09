@@ -80,7 +80,81 @@ Karena program tersebut harus dapat berjalan setiap 3 detik sekali, maka cukup t
 ```
 sleep(3);
 ```
- 
+## Nomor 3
+### Soal:
+
+3. Diberikan file campur2.zip. Di dalam file tersebut terdapat folder “campur2”.
+Buatlah program C yang dapat : 
+  i)  mengekstrak file zip tersebut. 
+  ii) menyimpan daftar file dari folder “campur2” yang memiliki ekstensi .txt ke dalam file daftar.txt.  
+  Catatan:  
+    ○ Gunakan fork dan exec. 
+    ○ Gunakan minimal 3 proses yang diakhiri dengan exec. 
+    ○ Gunakan pipe 
+    ○ Pastikan file daftar.txt dapat diakses dari text editor 
+
+## Jawaban:
+
+Langkah pertama adalah meng-unzip file campur2.zip. Kita dapat melakukan `fork()` lalu lakukan perintah unzip dengan menggunakan perintah `execlp` pada C dengan parameter `"unzip", "unzip", "campur2.zip", NULL` dan wait hingga child prosesnya selesai. Syntaxnya sebagai berikut:
+```
+pid_t child_id;
+child_id = fork();
+if (child_id == 0) {
+  execlp("/usr/bin/unzip", "unzip", "campur2.zip", NULL);
+}
+while (wait(&status) > 0);
+```
+Setelah itu, kita buat redirection untuk `daftar.txt` dengan perintah `open`, dengan parameter `O_RWRD (Untuk Read dan Write) | O_CREAT (Untuk create jika belum ada), 0777 (Permission)`. Perlu diperhatikan bahwa permission 0777 agar file dapat diakses dari text editor. Syntax tersebut jg sekaligus menyimpan variabel file yang nantinya akan di redirect. Syntaxnya seperti ini:
+```
+int fileout = open("daftar.txt", O_RDWR | O_CREAT, 0777);
+```
+Langkah selanjutnya adalah membuat 2 pipe, pipe pertama sebagai input bagi `grep`, dan pipe kedua sebagai output bagi `ls`.
+syntaxnya:
+```
+int pipes[2];
+pipe(pipes);
+```
+Sampai saat ini, perlu diingat yang akan kita jalankan adalah `ls | grep .txt$ > daftar.txt`
+
+Proses selanjutnya adalah membuat proses `ls` nya. Cukup melakukan `fork()` lalu memasukkan hasil `execlp("ls", "ls", "campur2", NULL)` ke pipe tersebut. Perintah `dup2` berguna untuk menduplikasi pipe sebelumnya, dengan parameter kedua memiliki nilai streamnya. argumen 0 adalah stdin, argumen 1 adalah stdout, argumen 3 adalah stderr. Syntaxnya seperti ini:
+```
+child_id = fork();
+if (child_id == 0) {
+  dup2(pipes[1], 1);
+  for (int i = 0; i < 2; i++)
+    close(pipes[i]);
+  execlp("ls", "ls", "campur2", NULL);
+}
+  ```
+Proses selanjutnya adalah membuat proses `grep` dari pipe sebelumnya. Cukup melakukan `fork()` lalu memasukkan hasil pipe tadi dengan perintah `dup`, menyiapkan pipe untuk keluar dengan perintah `dup` dan mengeksekusi perintah `grep` dengan perintah `execlp`. Perlu diperhatikan bahwa perintah grep yang akan dijalankan untuk memeriksa file yang berekstensi `.txt` adalah `grep .txt$` dollar sign sebagai pembatas akhir dalam suatu regular expression. Sehingga parameternya menjadi `execlp("grep", "grep", ".txt$", NULL)`. Syntaxnya menjadi:
+```
+child_id = fork();
+if (child_id == 0) {
+  dup2(pipes[0], 0);
+  dup2(fileout, 1);
+
+  for (int i = 0; i < 2; i++)
+    close(pipes[i]);
+
+  execlp("grep", "grep", ".txt$", NULL);
+}
+```
+Jangan lupa untuk menutup pipe pada parent process dengan menambahkan syntax:
+```
+for (int i = 0; i < 2; i++)
+  close(pipes[i]);
+```
+Perintah terakhir adalah menunggu child proses berhenti, karena kita menjalankan 2 child proses(`ls` dan `grep`) maka kita memerlukan 2 wait()
+```
+while (wait(&status) > 0);
+while (wait(&status) > 0);
+```
+Kesimpulan
+```
+Proses yang dilakukan ada 3 : (`unzip`, `ls`, dan `grep`) Sekaligus menggunakan `fork()` dan `exec()`.
+Menggunakan `pipe` untuk komunkasi antara proses `ls` dan `grep`.
+Permission file `daftar.txt` diubah menjadi 0777 agar dapat diakses siapapun.
+```
 ## Nomor 4
 ### Soal:
 

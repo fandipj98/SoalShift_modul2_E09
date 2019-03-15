@@ -26,14 +26,13 @@ int main() {
 
 	int fileout = open("daftar.txt", O_RDWR | O_CREAT, 0777);
 
-	int pipes[4];
+	int pipes[2];
 	pipe(pipes);
-	pipe(pipes + 2);
 
 	child_id = fork();
 	if (child_id == 0) {
 		dup2(pipes[1], 1);
-		for (int i = 0; i < 4; i++)
+		for (int i = 0; i < 2; i++)
 			close(pipes[i]);
 		execlp("ls", "ls", "campur2", NULL);
 	}
@@ -42,12 +41,12 @@ int main() {
 		dup2(pipes[0], 0);
 		dup2(fileout, 1);
 
-		for (int i = 0; i < 4; i++)
+		for (int i = 0; i < 2; i++)
 			close(pipes[i]);
 
 		execlp("grep", "grep", ".txt$", NULL);
 	}
-	for (int i = 0; i < 4; i++)
+	for (int i = 0; i < 2; i++)
 		close(pipes[i]);
 	while (wait(&status) > 0);
 	while (wait(&status) > 0);
