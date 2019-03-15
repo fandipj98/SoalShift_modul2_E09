@@ -1,5 +1,8 @@
 # Laporan Resmi Sistem Operasi Modul2 E09
 
+#### Fandi Pranata Jaya - 05111740000056
+#### Fadhil Musaad Al Giffary - 05111740000116
+
 ## Nomor 1
 ### Soal:
 
@@ -32,6 +35,7 @@ Lalu, langkah selanjutnya adalah memeriksa setiap file pada current directory. J
     memset(fileOut, 0, sizeof fileOut);
     strcpy(fileName,ent->d_name);
     ptrToSubString = strstr(fileName,".png");
+    #
     if (ptrToSubString == NULL)
       continue;
     if (strcmp(ptrToSubString, ".png") == 0) {
