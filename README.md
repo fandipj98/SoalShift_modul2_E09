@@ -52,6 +52,6 @@ Kemudian setiap 30 menit, kita membuat folder dengan format yang [dd:MM:yyyy-hh:
 ```
 Kemudian untuk menghentikan program diatas maka digunakan syntax seperti berikut ini:
 ```
-	char *argv[4] = {"pkill", "-e", "soal5", NULL};
+  char *argv[4] = {"pkill", "-e", "soal5", NULL};
   execv("/usr/bin/pkill", argv);
 ```
