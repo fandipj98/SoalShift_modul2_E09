@@ -53,8 +53,34 @@ Langkah terakhir adalah menambahkan waktu untuk pengulangan background proses. K
 ```
 sleep(10);
 ```
+## Nomor 2
+### Soal:
 
+2. Pada suatu hari Kusuma dicampakkan oleh Elen karena Elen dimenangkan oleh orang lain. Semua kenangan tentang Elen berada pada file bernama “elen.ku” pada direktori “hatiku”. Karena sedih berkepanjangan, tugas kalian sebagai teman Kusuma adalah membantunya untuk menghapus semua kenangan tentang Elen dengan membuat program C yang bisa mendeteksi owner dan group dan menghapus file “elen.ku” setiap 3 detik dengan syarat ketika owner dan grupnya menjadi “www-data”. Ternyata kamu memiliki kendala karena permission pada file “elen.ku”. Jadi, ubahlah permissionnya menjadi 777. Setelah kenangan tentang Elen terhapus, maka Kusuma bisa move on. Catatan: Tidak boleh menggunakan crontab.
 
+## Jawaban:
+Pertama-tama kita membuat daemonnya terlebih dahulu. Setelah itu kita memeriksa apakah file tersebut ada atau tidak dengan menggunakan perintah `stat`. Perintah tersebut akan mengembalikan nilai 0 jika ada dan -1 jika tidak. Setelah itu, jika file tersebut ada, maka kita harus mencari user dan group pemilik file tersebut. Untuk user, kita dapat menggunakan perintah `getpwuid([uid dari file]` dan mengakses `pw_name` dari hasil tersebut. Untuk group dapat menggunakan perintah `getgrgid[gid dari file]` dan mengakses `gr_name` dari hasil. Setelah itu, kita memeriksa apakah user dan group pemilik file tersebut adalah `www-data`. Untuk itu, dapat digunakan perintah `strcmp` seperti halnya pada jawaban nomor 1. Jika kondisi diatas benar, maka untuk menghapusnya kita perlu mengubah permissionnya terlebih dahulu menggunakan perintah `chmod[mode yang diinginkan (dalam kasus ini 0777)]`. Setelah itu cukup melakukan perintah `remove`. Sehingga syntaxnya menjadi seperti berikut:
+```
+char* filename = "/home/fms/Documents/hatiku/elen.ku";
+struct stat info;
+int status = stat(filename, &info);
+if (status == 0) {
+  struct passwd *pw = getpwuid(info.st_uid);
+  struct group *gr = getgrgid(info.st_gid);
+  // printf("%s %s\n", pw->pw_name, gr->gr_name);
+  // printf("%d %d\n", strcmppw->pw_name, gr->gr_name);
+  if (!strcmp(pw->pw_name, "www-data") && !strcmp(gr->gr_name, "www-data")) {
+    chmod(filename, 0777);
+    remove(filename);
+  }
+}
+
+```
+Karena program tersebut harus dapat berjalan setiap 3 detik sekali, maka cukup tambahkan perintah 
+```
+sleep(3);
+```
+ 
 ## Nomor 4
 ### Soal:
 
