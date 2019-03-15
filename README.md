@@ -1,5 +1,60 @@
 # Laporan Resmi Sistem Operasi Modul2 E09
 
+## Nomor 1
+### Soal:
+
+1. Elen mempunyai pekerjaan pada studio sebagai fotografer. Suatu hari ada seorang klien yang bernama Kusuma yang meminta untuk mengubah nama file yang memiliki ekstensi .png menjadi "`[namafile]_grey.png`". Karena jumlah file yang diberikan Kusuma tidak manusiawi, maka Elen meminta bantuan kalian untuk membuat suatu program C yang dapat mengubah nama secara otomatis dan diletakkan pada direktori `/home/[user]/modul2/gambar`. Catatan : Tidak boleh menggunakan crontab.
+
+### Jawaban:
+Awalnya kita buat proses daemon terlebih dahulu. Kemudian pada main program, kita memeriksa apakah direktori tujuan telah terbuat atau belum dengan menggunakan perintah `opendir` pada C. Jika sudah dibuat, kita dapat melanjutkannya. Jika tidak, 
+kita buat direktori tersebut dengan perintah `mkdir`. Sehingga syntaxnya seperti ini:
+```
+DIR* dir = opendir("/home/fms/modul2/gambar");
+if (dir) {
+  closedir(dir);
+}
+else {
+  mkdir("/home/fms/modul2", 0777);
+  mkdir("/home/fms/modul2/gambar", 0777);
+}
+
+```
+Lalu, langkah selanjutnya adalah memeriksa setiap file pada current directory. Jika ekstensi file tersebut berupa `.png`, maka kita perlu menambah `_grey` pada nama file tersebut lalu memindahkannya ke `/home/[user]/modul2/gambar`. Untuk iterasi setiap file pada directory tersebut, kita dapat menggunakan perintah `readdir([directory])`. Untuk memeriksa apakah file tersebut memiliki ekstensi `.png` dapat dilakukan dengan mencari substring `.png` dengan perintah `strstr`. Perlu diperhatikan bahwa perintah `strstr` akan mengembalikan sebuah string baru dengan pada kemunculan pertama string yang dicari hingga akhir. Sehingga kita perlu memeriksa apakah string akhir tersebut hanya berupa `.png` atau tidak. Untuk hal tersebut cukup menggunakan perintah `strcmp` yang bernilai sama dengan 0 saat kedua string yang di komparasi bernilai sama. Langkah selanjutnya adalah menyisipkan `_grey` pada filename. Hal tersebut dapat dilakukan dengan mengiris filename awal sebelum ekstensi, menambahkan `_grey` pada akhir string tersebut, dan menambahkan kembali ekstensinya. Sehingga secara keseluruhan syntaxnya menjadi seperti ini:
+```
+char *ptrToSubString;
+char fileName[100];
+char fileOut[100];
+char *dirs = "/home/fms/modul2/gambar/";
+char grey[] = "_grey.png";
+struct dirent *ent;
+dir = opendir(".");
+while((ent = readdir(dir)) != NULL) {
+ memset(fileName, 0, sizeof fileName);
+ memset(fileOut, 0, sizeof fileOut);
+ strcpy(fileName,ent->d_name);
+ ptrToSubString = strstr(fileName,".png");
+ if (ptrToSubString == NULL)
+   continue;
+ if (strcmp(ptrToSubString, ".png") == 0) {
+  printf("%s\n", fileName);
+  char tmp[100];
+  strncpy(tmp, fileName, strlen(fileName) - 4);
+  strcat(fileOut, dirs);
+  strcat(fileOut, tmp);
+  strcat(fileOut, grey);
+  rename(fileName, fileOut);
+ } else {
+  continue;
+ }
+}
+closedir(dir);
+``` 
+Langkah terakhir adalah menambahkan waktu untuk pengulangan background proses. Karena tidak dicantumkan di soal, cukup menambahkan angka aman seperti 10 / 15 detik.
+```
+sleep(10);
+```
+
+
 ## Nomor 4
 ### Soal:
 
