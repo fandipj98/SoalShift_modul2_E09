@@ -209,7 +209,7 @@ Kemudian kita mengconvert waktu akses terakhir kali dari file makan_enak.txt dan
   detik1=(now[6]-'0')*10;
   detik1+=now[7]-'0';
 ```
-Kemudian kita menghitung selisih dari waktu sekarang dengan waktu akses terakhir kali dari file makan_enak.txt berdasarkan satuan detik, jika selisihnya kurang dari atau sama dengan 30 detik, maka kita membuat file makan_sehat#.txt di dalam direktori /home/fandipj/Documents/makanan setiap 5 detik dengan # dimulai dari 1 dan diincrement sebanyak 1 per 5 detik dengan syntax seperti berikut ini:
+Kemudian kita menghitung selisih dari waktu sekarang dengan waktu akses terakhir kali dari file makan_enak.txt berdasarkan satuan detik, jika selisihnya kurang dari atau sama dengan 30 detik, maka kita membuat file makan_sehat#.txt di dalam direktori /home/fandipj/Documents/makanan setiap 5 detik dengan # dimulai dari 1 dan diincrement sebanyak 1 per 5 detik dengan menggunakan `pfile = fopen(path, "a")` dan kemudian di close dengan menggunakan `fclose(pfile)`, syntax lengkapnya seperti berikut ini:
 ```
   if(tanggal1-tanggal<=1){
     if(tanggal1-tanggal==1){
@@ -247,7 +247,7 @@ a) Buatlah program c untuk mencatat log setiap menit dari file log pada syslog k
 <br/>NB: Dilarang menggunakan crontab dan tidak memakai argumen ketika menjalankan program.
 
 ### Jawaban:
-Pertama – tama kita membuat proses daemon, kemudian pada menit awal (menit 0), kita membuat folder dengan format /home/fandipj/log/[dd:MM:yyyy-hh:mm] dengan [dd:MM:yyyy-hh:mm] adalah waktu sekarang. Syntax untuk mendapatkan waktu sekarang adalah seperti berikut ini:
+Pertama – tama kita membuat proses daemon, kemudian pada menit awal (menit 0), kita membuat folder dengan format /home/fandipj/log/[dd:MM:yyyy-hh:mm] dengan [dd:MM:yyyy-hh:mm] adalah waktu sekarang yang didapatkan dengan menggunakan `struct tm` dan `strftime()`. Syntax untuk mendapatkan waktu sekarang adalah seperti berikut ini:
 ```
   time_t t; 
   struct tm *tmp;
@@ -256,7 +256,7 @@ Pertama – tama kita membuat proses daemon, kemudian pada menit awal (menit 0),
   strftime(date, sizeof(date), "%d:%m:%Y-%H:%M", tmp);
       
 ```
-Syntax untuk membuat folder adalah dengan menggunakan mkdir() dari C seperti berikut ini:
+Syntax untuk membuat folder adalah dengan menggunakan `mkdir(path,0777)` dari C seperti berikut ini:
 ```
   char path[100],source[100]="/home/fandipj/log/"; 
   strcpy(path, source);
@@ -264,7 +264,7 @@ Syntax untuk membuat folder adalah dengan menggunakan mkdir() dari C seperti ber
   strcat(path,date);            
   mkdir(path, 0777);
 ```
-Kemudian setiap 30 menit, kita membuat folder dengan format yang [dd:MM:yyyy-hh:mm] yang baru dan yang sesuai dengan waktu sekarang dan setiap 1 menit, kita mengcopy file log pada syslog ke /home/[user]/log/[dd:MM:yyyy-hh:mm]/log#.log dengan # dimulai dari 1 dan diincrement sebanyak 1 per menitnya. Untuk mengcopy file log tersebut, maka digunakan `fork()` untuk membuat child process setiap 1 menit dan pada setiap child processnya dijalankan `execv("/bin/cp", argv)` seperti syntax dibawah ini:
+Kemudian setiap 30 menit, kita membuat folder dengan format yang [dd:MM:yyyy-hh:mm] yang baru dan yang sesuai dengan waktu sekarang dan setiap 1 menit, kita mengcopy file log pada syslog ke /home/[user]/log/[dd:MM:yyyy-hh:mm]/log#.log dengan # dimulai dari 1 dan diincrement sebanyak 1 per menitnya. Untuk mengcopy file log tersebut, maka digunakan `fork()` untuk membuat child process setiap 1 menit dan pada setiap child processnya dijalankan `execv("/bin/cp", argv)`. Kemudian parent menunggu sampai child process nya selesai dengan menggunakan `while ((wait(&status)) > 0);`, setiap child process nya selesai, maka counter akan ditambah 1 dan counter akan direset menjadi 0 ketika counternya = 31, syntax selengkapnya seperti dibawah ini:
 ```
   child_id = fork();
   sleep(60);
